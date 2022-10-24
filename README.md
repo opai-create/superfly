@@ -11,3 +11,7 @@ Visuals
 World modulation (fog & bloom changes)
 Nightmode
 ```
+Special credits to:
+KIRBI512
+Infirms1337
+Kamaz
