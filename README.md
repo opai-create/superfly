@@ -5,6 +5,7 @@ But anyway there's a lot of some pasted code, except this features:
 
 ```
 Animaton resolver (doesnt work now)
+Rage aimbot & hitscan 
 Anti aims
 Visuals
 World modulation (fog & bloom changes)
