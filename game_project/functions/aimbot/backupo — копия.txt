@@ -1,0 +1,102 @@
+#pragma once
+#include <array>
+
+#include "../hvh/lag_compensation.h"
+#include "../../base/tools/math.h"
+
+class c_csplayer;
+
+struct best_target_t
+{
+	bool filled = false;
+	c_csplayer* player = nullptr;
+	float sim_time = -1.f;
+	vector3d point = {};
+	int hitbox = -1;
+	alignas(16) matrix3x4_t matrix[256] = {};
+
+	void get(c_csplayer* player, float sim_time, const vector3d& point, int hitbox, matrix3x4_t* matrix)
+	{
+		this->point = point;
+		this->sim_time = sim_time;
+		this->hitbox = hitbox;
+		this->player = player;
+
+		std::memcpy(this->matrix, matrix, sizeof(matrix3x4_t) * 256);
+
+		this->filled = true;
+	}
+
+	void reset()
+	{
+		this->point.reset();
+		this->sim_time = -1.f;
+		this->hitbox = -1;
+		this->player = nullptr;
+
+		std::memset(this->matrix, 0, sizeof(this->matrix));
+
+		this->filled = false;
+	}
+};
+
+enum scan_type_t
+{
+	last_tick = 0,
+	old_tick,
+};
+
+struct tick_selection_t
+{
+	vector3d point = {};
+	int damage = 0;
+	int hitbox = 0;
+
+	tick_selection_t() = default;
+
+	tick_selection_t(const vector3d& point, int damage, int hitbox)
+	{
+		this->point = point;
+		this->damage = damage;
+		this->hitbox = hitbox;
+	}
+};
+
+struct aimbot_data_t 
+{
+	// get data from center point and multipoints
+	vector3d points[2] = {};
+	int damages[2] = {};
+	int hitbox = -1;
+	bool body = false;
+	record_t* record = nullptr;
+
+	aimbot_data_t() = default;
+
+	aimbot_data_t(const vector3d& center, const vector3d& multi,
+		int center_dmg, int dmg, int hitbox, bool body, record_t* record)
+	{
+		this->points[0] = center;
+		this->points[1] = multi;
+
+		this->damages[0] = center_dmg;
+		this->damages[1] = dmg;
+
+		this->hitbox = hitbox;
+
+		this->record = record;
+	}
+};
+
+namespace aim_utils
+{
+	void prepare_seed();
+	void on_round_events(c_game_event* event);
+
+	int hitbox_to_hitgroup(int hitbox);
+}
+
+namespace ragebot
+{
+	void run();
+}

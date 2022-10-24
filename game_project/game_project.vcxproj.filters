@@ -1,0 +1,603 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="additionals">
+      <UniqueIdentifier>{063e2be8-da44-4faf-9ef7-5ddfef20815c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="additionals\json">
+      <UniqueIdentifier>{910e8998-b5c7-479f-9925-6bb7748328bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="additionals\memory_related">
+      <UniqueIdentifier>{98379a62-c42b-4a21-953f-430f23454eaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="additionals\minhook">
+      <UniqueIdentifier>{d2dd1e5f-072f-4feb-ab23-0c1fcbbbffb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="additionals\minhook\hde">
+      <UniqueIdentifier>{cd308438-ab85-4933-8982-ccaf81e3c879}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="additionals\threading">
+      <UniqueIdentifier>{2b7e67e5-40c5-4cee-8b2c-1cac467cc232}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base">
+      <UniqueIdentifier>{347923f4-4e0c-41dd-aff0-6e256266838a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\hooks">
+      <UniqueIdentifier>{8ff8593a-9a6a-4425-8dc7-b3eed8d44632}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\hooks\targets">
+      <UniqueIdentifier>{9957db91-96a5-4c2d-959b-e8f3e66bc959}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\igname objects">
+      <UniqueIdentifier>{d8210f66-bf7c-4ccb-8dcf-8c8de434778f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\interfaces">
+      <UniqueIdentifier>{a2e98860-d4b6-4368-9cc6-604b32ac1a7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\other">
+      <UniqueIdentifier>{3db1358b-4a04-4d66-b24c-f3f859dad96d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\tools">
+      <UniqueIdentifier>{0a68debc-b570-4589-8f44-ae4f310dd434}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions">
+      <UniqueIdentifier>{a374bc99-978c-4922-be34-c0f15ebfe127}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions\aimbot">
+      <UniqueIdentifier>{c5f65b60-4e35-4335-a4a5-328391c91690}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions\anti hit">
+      <UniqueIdentifier>{8a3975aa-d5ac-4db2-b6fc-da4da89c52e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions\extra">
+      <UniqueIdentifier>{2ba83e85-9779-42fa-a3dd-810a545a7e8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions\listeners">
+      <UniqueIdentifier>{cfdb2caa-ef84-4a16-9595-39d2b7ae798c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions\menu">
+      <UniqueIdentifier>{a6008b3b-470c-4e94-8477-07f90f91c675}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions\visuals">
+      <UniqueIdentifier>{838dab02-dccc-45c6-a5c1-ac0aa8948b20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions\menu\menu elements">
+      <UniqueIdentifier>{bcc19e5d-c414-4f85-af26-d918ebf20379}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions\visuals\chams">
+      <UniqueIdentifier>{86a4b260-85b8-498b-8972-450fc04889b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions\visuals\esp">
+      <UniqueIdentifier>{eee2062d-65af-46d6-b865-218ce5abad81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions\visuals\local">
+      <UniqueIdentifier>{ce473dd3-f733-4dc6-aded-174a2eeee4c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions\visuals\esp\event">
+      <UniqueIdentifier>{14e5303e-4b50-42e3-9ac2-e3c53e577b3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions\hvh">
+      <UniqueIdentifier>{26594854-147e-4e2a-8436-66f644cf7bcf}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="additionals\json\json.h">
+      <Filter>additionals\json</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\json\json-forwards.h">
+      <Filter>additionals\json</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\memory_related\address.h">
+      <Filter>additionals\memory_related</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\memory_related\hash.h">
+      <Filter>additionals\memory_related</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\memory_related\modules.h">
+      <Filter>additionals\memory_related</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\memory_related\nt.h">
+      <Filter>additionals\memory_related</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\memory_related\pattern.h">
+      <Filter>additionals\memory_related</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\memory_related\pe.h">
+      <Filter>additionals\memory_related</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\minhook\buffer.h">
+      <Filter>additionals\minhook</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\minhook\MinHook.h">
+      <Filter>additionals\minhook</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\minhook\trampoline.h">
+      <Filter>additionals\minhook</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\minhook\hde\hde32.h">
+      <Filter>additionals\minhook\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\minhook\hde\hde64.h">
+      <Filter>additionals\minhook\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\minhook\hde\pstdint.h">
+      <Filter>additionals\minhook\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\minhook\hde\table32.h">
+      <Filter>additionals\minhook\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\minhook\hde\table64.h">
+      <Filter>additionals\minhook\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\threading\atomic_lock.h">
+      <Filter>additionals\threading</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\threading\mutex.h">
+      <Filter>additionals\threading</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\threading\packed_heap.h">
+      <Filter>additionals\threading</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\threading\semaphores.h">
+      <Filter>additionals\threading</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\threading\shared_mutex.h">
+      <Filter>additionals\threading</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\threading\threading.h">
+      <Filter>additionals\threading</Filter>
+    </ClInclude>
+    <ClInclude Include="additionals\threading\wincludes.h">
+      <Filter>additionals\threading</Filter>
+    </ClInclude>
+    <ClInclude Include="base\global_variables.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\sdk.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\ingame objects\activity.h">
+      <Filter>base\igname objects</Filter>
+    </ClInclude>
+    <ClInclude Include="base\ingame objects\c_animationlayer.h">
+      <Filter>base\igname objects</Filter>
+    </ClInclude>
+    <ClInclude Include="base\ingame objects\c_animstate.h">
+      <Filter>base\igname objects</Filter>
+    </ClInclude>
+    <ClInclude Include="base\ingame objects\c_baseanimating.h">
+      <Filter>base\igname objects</Filter>
+    </ClInclude>
+    <ClInclude Include="base\ingame objects\c_basecombatweapon.h">
+      <Filter>base\igname objects</Filter>
+    </ClInclude>
+    <ClInclude Include="base\ingame objects\c_baseentity.h">
+      <Filter>base\igname objects</Filter>
+    </ClInclude>
+    <ClInclude Include="base\ingame objects\c_csplayer.h">
+      <Filter>base\igname objects</Filter>
+    </ClInclude>
+    <ClInclude Include="base\ingame objects\c_csplayerresource.h">
+      <Filter>base\igname objects</Filter>
+    </ClInclude>
+    <ClInclude Include="base\ingame objects\c_material.h">
+      <Filter>base\igname objects</Filter>
+    </ClInclude>
+    <ClInclude Include="base\ingame objects\c_studio_model.h">
+      <Filter>base\igname objects</Filter>
+    </ClInclude>
+    <ClInclude Include="base\ingame objects\c_usercmd.h">
+      <Filter>base\igname objects</Filter>
+    </ClInclude>
+    <ClInclude Include="base\ingame objects\c_utlvector.h">
+      <Filter>base\igname objects</Filter>
+    </ClInclude>
+    <ClInclude Include="base\ingame objects\studio_hdr.h">
+      <Filter>base\igname objects</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\app_system.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\beams.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\client.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\client_mode.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\convars.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\debug_overlay.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\engine.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\engine_trace.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\entity_list.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\event_manager.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\global_vars_base.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\input.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\input_system.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\localize.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\material_system.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\memalloc.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\model_info.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\model_render.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\panel.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\prediction.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\studio_render.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\surface.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="base\tools\math.h">
+      <Filter>base\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="base\tools\memory.h">
+      <Filter>base\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="base\tools\netvar_parser.h">
+      <Filter>base\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="base\tools\render.h">
+      <Filter>base\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="base\other\checksum_crc.h">
+      <Filter>base\other</Filter>
+    </ClInclude>
+    <ClInclude Include="base\other\color.h">
+      <Filter>base\other</Filter>
+    </ClInclude>
+    <ClInclude Include="base\other\game_functions.h">
+      <Filter>base\other</Filter>
+    </ClInclude>
+    <ClInclude Include="base\hooks\hooks.h">
+      <Filter>base\hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="base\hooks\wrapper.h">
+      <Filter>base\hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\config_system.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\config_vars.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\aimbot\engine_prediction.h">
+      <Filter>functions\aimbot</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\aimbot\ragebot.h">
+      <Filter>functions\aimbot</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\anti hit\anti_aim.h">
+      <Filter>functions\anti hit</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\anti hit\exploits.h">
+      <Filter>functions\anti hit</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\anti hit\fake_lag.h">
+      <Filter>functions\anti hit</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\extra\function_checks.h">
+      <Filter>functions\extra</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\extra\movement.h">
+      <Filter>functions\extra</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\extra\world_modulation.h">
+      <Filter>functions\extra</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\listeners\listener_entity.h">
+      <Filter>functions\listeners</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\listeners\listener_event.h">
+      <Filter>functions\listeners</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\menu\menu.h">
+      <Filter>functions\menu</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\visuals\chams\chams.h">
+      <Filter>functions\visuals\chams</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\visuals\esp\box.h">
+      <Filter>functions\visuals\esp</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\visuals\esp\nades.h">
+      <Filter>functions\visuals\esp</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\visuals\esp\player.h">
+      <Filter>functions\visuals\esp</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\visuals\esp\weapon.h">
+      <Filter>functions\visuals\esp</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\visuals\esp\event\event_visuals.h">
+      <Filter>functions\visuals\esp\event</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\visuals\local\local_player_visuals.h">
+      <Filter>functions\visuals\local</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\visuals\visuals.h">
+      <Filter>functions\visuals</Filter>
+    </ClInclude>
+    <ClInclude Include="includes.h" />
+    <ClInclude Include="windows_includes.h" />
+    <ClInclude Include="functions\hvh\anim_correction.h">
+      <Filter>functions\hvh</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\hvh\lag_compensation.h">
+      <Filter>functions\hvh</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\hvh\setup_bones_manager.h">
+      <Filter>functions\hvh</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\aimbot\autowall.h">
+      <Filter>functions\aimbot</Filter>
+    </ClInclude>
+    <ClInclude Include="base\interfaces\phys_props.h">
+      <Filter>base\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\extra\auto_revolver.h">
+      <Filter>functions\extra</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\hvh\resolver.h">
+      <Filter>functions\hvh</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="additionals\json\jsoncpp.cpp">
+      <Filter>additionals\json</Filter>
+    </ClCompile>
+    <ClCompile Include="additionals\minhook\buffer.c">
+      <Filter>additionals\minhook</Filter>
+    </ClCompile>
+    <ClCompile Include="additionals\minhook\hook.c">
+      <Filter>additionals\minhook</Filter>
+    </ClCompile>
+    <ClCompile Include="additionals\minhook\trampoline.c">
+      <Filter>additionals\minhook</Filter>
+    </ClCompile>
+    <ClCompile Include="additionals\minhook\hde\hde32.c">
+      <Filter>additionals\minhook\hde</Filter>
+    </ClCompile>
+    <ClCompile Include="additionals\minhook\hde\hde64.c">
+      <Filter>additionals\minhook\hde</Filter>
+    </ClCompile>
+    <ClCompile Include="additionals\threading\atomic_lock.cpp">
+      <Filter>additionals\threading</Filter>
+    </ClCompile>
+    <ClCompile Include="additionals\threading\mutex.cpp">
+      <Filter>additionals\threading</Filter>
+    </ClCompile>
+    <ClCompile Include="additionals\threading\packed_heap.cpp">
+      <Filter>additionals\threading</Filter>
+    </ClCompile>
+    <ClCompile Include="additionals\threading\semaphores.cpp">
+      <Filter>additionals\threading</Filter>
+    </ClCompile>
+    <ClCompile Include="additionals\threading\shared_mutex.cpp">
+      <Filter>additionals\threading</Filter>
+    </ClCompile>
+    <ClCompile Include="additionals\threading\threading.cpp">
+      <Filter>additionals\threading</Filter>
+    </ClCompile>
+    <ClCompile Include="base\global_variables.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\ingame objects\c_animstate.cpp">
+      <Filter>base\igname objects</Filter>
+    </ClCompile>
+    <ClCompile Include="base\ingame objects\c_baseanimating.cpp">
+      <Filter>base\igname objects</Filter>
+    </ClCompile>
+    <ClCompile Include="base\ingame objects\c_basecombatweapon.cpp">
+      <Filter>base\igname objects</Filter>
+    </ClCompile>
+    <ClCompile Include="base\ingame objects\c_baseentity.cpp">
+      <Filter>base\igname objects</Filter>
+    </ClCompile>
+    <ClCompile Include="base\ingame objects\c_csplayer.cpp">
+      <Filter>base\igname objects</Filter>
+    </ClCompile>
+    <ClCompile Include="base\tools\math.cpp">
+      <Filter>base\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="base\tools\memory.cpp">
+      <Filter>base\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="base\tools\netvar_parser.cpp">
+      <Filter>base\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="base\tools\render.cpp">
+      <Filter>base\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="base\other\checksum_crc.cpp">
+      <Filter>base\other</Filter>
+    </ClCompile>
+    <ClCompile Include="base\other\game_functions.cpp">
+      <Filter>base\other</Filter>
+    </ClCompile>
+    <ClCompile Include="base\hooks\hooks.cpp">
+      <Filter>base\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="base\hooks\targets\client.cpp">
+      <Filter>base\hooks\targets</Filter>
+    </ClCompile>
+    <ClCompile Include="base\hooks\targets\client_mode.cpp">
+      <Filter>base\hooks\targets</Filter>
+    </ClCompile>
+    <ClCompile Include="base\hooks\targets\convars.cpp">
+      <Filter>base\hooks\targets</Filter>
+    </ClCompile>
+    <ClCompile Include="base\hooks\targets\engine.cpp">
+      <Filter>base\hooks\targets</Filter>
+    </ClCompile>
+    <ClCompile Include="base\hooks\targets\input.cpp">
+      <Filter>base\hooks\targets</Filter>
+    </ClCompile>
+    <ClCompile Include="base\hooks\targets\material_system.cpp">
+      <Filter>base\hooks\targets</Filter>
+    </ClCompile>
+    <ClCompile Include="base\hooks\targets\player_hook.cpp">
+      <Filter>base\hooks\targets</Filter>
+    </ClCompile>
+    <ClCompile Include="base\hooks\targets\prediction.cpp">
+      <Filter>base\hooks\targets</Filter>
+    </ClCompile>
+    <ClCompile Include="base\hooks\targets\studio_render.cpp">
+      <Filter>base\hooks\targets</Filter>
+    </ClCompile>
+    <ClCompile Include="base\hooks\targets\surface.cpp">
+      <Filter>base\hooks\targets</Filter>
+    </ClCompile>
+    <ClCompile Include="base\hooks\targets\vgui_panel.cpp">
+      <Filter>base\hooks\targets</Filter>
+    </ClCompile>
+    <ClCompile Include="base\hooks\targets\wnd_proc.cpp">
+      <Filter>base\hooks\targets</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\config_system.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\config_vars.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\aimbot\engine_prediction.cpp">
+      <Filter>functions\aimbot</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\aimbot\ragebot.cpp">
+      <Filter>functions\aimbot</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\anti hit\anti_aim.cpp">
+      <Filter>functions\anti hit</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\anti hit\exploits.cpp">
+      <Filter>functions\anti hit</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\anti hit\fake_lag.cpp">
+      <Filter>functions\anti hit</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\extra\function_checks.cpp">
+      <Filter>functions\extra</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\extra\movement.cpp">
+      <Filter>functions\extra</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\extra\world_modulation.cpp">
+      <Filter>functions\extra</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\listeners\listener_entity.cpp">
+      <Filter>functions\listeners</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\listeners\listener_event.cpp">
+      <Filter>functions\listeners</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\menu\menu.cpp">
+      <Filter>functions\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\menu\menu elements\button.cpp">
+      <Filter>functions\menu\menu elements</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\menu\menu elements\checkbox.cpp">
+      <Filter>functions\menu\menu elements</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\menu\menu elements\color_picker.cpp">
+      <Filter>functions\menu\menu elements</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\menu\menu elements\combo_box.cpp">
+      <Filter>functions\menu\menu elements</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\menu\menu elements\keybind.cpp">
+      <Filter>functions\menu\menu elements</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\menu\menu elements\multi_combo_box.cpp">
+      <Filter>functions\menu\menu elements</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\menu\menu elements\slider.cpp">
+      <Filter>functions\menu\menu elements</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\visuals\chams\chams.cpp">
+      <Filter>functions\visuals\chams</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\visuals\esp\box.cpp">
+      <Filter>functions\visuals\esp</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\visuals\esp\nades.cpp">
+      <Filter>functions\visuals\esp</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\visuals\esp\player.cpp">
+      <Filter>functions\visuals\esp</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\visuals\esp\weapon.cpp">
+      <Filter>functions\visuals\esp</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\visuals\esp\event\beams.cpp">
+      <Filter>functions\visuals\esp\event</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\visuals\esp\event\event_visuals.cpp">
+      <Filter>functions\visuals\esp\event</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\visuals\local\local_player_visuals.cpp">
+      <Filter>functions\visuals\local</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\visuals\visuals.cpp">
+      <Filter>functions\visuals</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="functions\hvh\anim_correction.cpp">
+      <Filter>functions\hvh</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\hvh\lag_compensation.cpp">
+      <Filter>functions\hvh</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\hvh\setup_bones_manager.cpp">
+      <Filter>functions\hvh</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\aimbot\autowall.cpp">
+      <Filter>functions\aimbot</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\extra\auto_revolver.cpp">
+      <Filter>functions\extra</Filter>
+    </ClCompile>
+    <ClCompile Include="base\hooks\targets\trace.cpp">
+      <Filter>base\hooks\targets</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\hvh\resolver.cpp">
+      <Filter>functions\hvh</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
+  </ItemGroup>
+</Project>

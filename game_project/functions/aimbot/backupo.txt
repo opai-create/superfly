@@ -1,0 +1,684 @@
+#include "ragebot.h"
+#include "autowall.h"
+
+#include "../../additionals/threading/threading.h"
+
+#include "../config_vars.h"
+#include "../../base/global_variables.h"
+
+#include "../extra/function_checks.h"
+#include "../listeners/listener_entity.h"
+
+#include "../../base/ingame objects/c_csplayer.h"
+#include "../../base/ingame objects/c_basecombatweapon.h"
+
+#include <vector>
+
+namespace aim_utils
+{
+	const int MAX_TRACES = 255;
+
+	// the best seeds with low spread range
+	// will be used for hitchance and they will be changed EVERY round
+	std::array<int, 13> seeds = { 236, 208, 194, 176, 144, 120, 133, 64, 61, 54, 45, 28, 1 };
+	std::array<std::array<float, MAX_TRACES>, 4> spread_poses = {};
+
+	void prepare_seed()
+	{
+		math::random_seed(g::hitchance_seed);
+		for (int i = 0; i < MAX_TRACES; i++)
+		{
+			spread_poses[0][i] = math::random_float(0.f, 1.f);
+			spread_poses[1][i] = math::random_float(0.f, 2.f * M_PI);
+			spread_poses[2][i] = math::random_float(0.f, 1.f);
+			spread_poses[3][i] = math::random_float(0.f, 2.f * M_PI);
+		}
+	}
+
+	// get random seed on round start
+	void on_round_events(c_game_event* event)
+	{
+		if (!strcmp(event->get_name(), "round_start"))
+		{
+			if (!g::init_seed)
+			{
+				math::random_seed(std::time(0));
+				g::hitchance_seed = seeds[math::random_int(0, 12)];
+				g::init_seed = true;
+			}
+		}
+	}
+
+	const float HEAD_SCALE = 1.f;
+	const float BODY_SCALE = 1.f;
+
+	vector3d get_recoil_angle()
+	{
+		static auto weapon_recoil_scale = interfaces::convar->find_convar("weapon_recoil_scale");
+		if (!weapon_recoil_scale)
+			return vector3d();
+
+		return g::local()->aim_punch_angle() * weapon_recoil_scale->get_float();
+	}
+
+	bool is_nospread()
+	{
+		static auto weapon_accuracy_nospread = interfaces::convar->find_convar("weapon_accuracy_nospread");
+		if (weapon_accuracy_nospread && weapon_accuracy_nospread->get_int() > 0)
+			return true;
+
+		return false;
+	}
+
+	bool can_hit_hitbox(const vector3d& start, const vector3d& end, c_csplayer* player, int hitbox, matrix3x4_t* matrix)
+	{
+		auto model = interfaces::model_info->get_studio_model(player->get_model());
+		auto set = model->get_hitbox_set(0);
+
+		if (!set)
+			return false;
+
+		auto studio_box = set->get_hitbox(hitbox);
+		if (!studio_box)
+			return false;
+
+		vector3d min, max;
+
+		const auto is_capsule = studio_box->radius != -1.f;
+
+		if (is_capsule)
+		{
+			math::vector_transform(studio_box->bbmin, matrix[studio_box->bone], min);
+			math::vector_transform(studio_box->bbmax, matrix[studio_box->bone], max);
+
+			const auto dist = math::segment_to_segment(start, end, min, max);
+
+			if (dist < studio_box->radius)
+				return true;
+		}
+		else
+		{
+			math::vector_transform(math::vector_rotate(studio_box->bbmin, studio_box->rotation), matrix[studio_box->bone], min);
+			math::vector_transform(math::vector_rotate(studio_box->bbmax, studio_box->rotation), matrix[studio_box->bone], max);
+
+			math::vector_i_transform(start, matrix[studio_box->bone], min);
+			math::vector_i_rotate(end, matrix[studio_box->bone], max);
+
+			if (math::intersect_line_with_bb(min, max, studio_box->bbmin, studio_box->bbmax))
+				return true;
+		}
+
+		return false;
+	}
+
+	bool hit(best_target_t& best, float chance)
+	{
+		if (is_nospread())
+			return true;
+
+		auto weapon = g::weapon();
+		if (!weapon)
+			return false;
+
+		auto weapon_info = weapon->get_weapon_info();
+		if (!weapon_info)
+			return false;
+
+		vector3d forward, right, up;
+		vector3d src = g::local()->eye_pos();
+		vector3d pos = math::angle_from_vectors(src, best.point);
+		math::angle_to_vectors(pos, &forward, &right, &up);
+
+		auto damage = 0;
+		auto hits = 0;
+		float weap_spread = g::weapon()->get_spread();
+		float weap_inaccuracy = g::weapon()->get_inaccuracy();
+
+		auto spread = weap_spread + weap_inaccuracy;
+
+		for (int i = 0; i < MAX_TRACES; i++)
+		{
+			float a = spread_poses[0][i];
+			float b = spread_poses[1][i];
+			float c = spread_poses[2][i];
+			float d = spread_poses[3][i];
+
+			float inaccuracy = a * weap_inaccuracy;
+			float spread = c * weap_spread;
+
+			if (weapon->definition_index() == weapon_revolver)
+			{
+				a = 1.f - a * a;
+				a = 1.f - c * c;
+			}
+
+			vector3d spread_view((std::cos(b) * inaccuracy) +  (std::cos(d) * spread), 
+				(std::sin(b) * inaccuracy) + (std::sin(d) * spread), 0), 
+				direction;
+
+			direction.x = forward.x + (spread_view.x * right.x) + (spread_view.y * up.x);
+			direction.y = forward.y + (spread_view.x * right.y) + (spread_view.y * up.y);
+			direction.z = forward.z + (spread_view.x * right.z) + (spread_view.y * up.z);
+			direction = direction.normalized();
+
+			vector3d view_angles_spread;
+			math::vector_to_angles(direction, up, view_angles_spread);
+			view_angles_spread = math::normalize(view_angles_spread);
+
+			vector3d view_forward;
+			math::angle_to_vectors(view_angles_spread, view_forward);
+			view_forward = view_forward.normalized();
+			view_forward = src + (view_forward * weapon_info->range);
+
+			if (can_hit_hitbox(src, view_forward, best.player, best.hitbox, best.matrix))
+			{
+				hits++;
+
+				auto autowall_data = autowall::run(view_forward, best.player, g::local());
+				if (autowall_data.damage >= 1)
+					damage++;
+			}
+		}
+
+		if (((float)hits / (float)MAX_TRACES) >= chance)
+			return true;
+
+		if (((float)damage / (float)MAX_TRACES) >= chance)
+			return true;
+
+		return false;
+	}
+
+	int hitbox_to_hitgroup(int hitbox) 
+	{
+		switch (hitbox)
+		{
+		case hitbox_head: 
+		case hitbox_neck:
+			return hitgroup_head;
+			break;
+		case hitbox_pelvis:
+		case hitbox_stomach:
+			return hitgroup_stomach;
+			break;
+		case hitbox_lower_chest:
+		case hitbox_chest:
+		case hitbox_upper_chest:
+			return hitgroup_chest;
+			break;
+		case hitbox_left_thigh:
+		case hitbox_left_calf:
+		case hitbox_left_foot:
+			return hitgroup_leftleg;
+			break;
+		case hitbox_right_thigh:
+		case hitbox_right_calf:
+		case hitbox_right_foot:
+			return hitgroup_rightleg;
+			break;
+		case hitbox_left_hand:
+		case hitbox_left_upper_arm:
+		case hitbox_left_forearm:
+			return hitgroup_leftarm;
+			break;
+		case hitbox_right_hand:
+		case hitbox_right_upper_arm:
+		case hitbox_right_forearm:
+			return hitgroup_rightarm;
+			break;
+
+		default: 
+			return hitgroup_generic;
+			break;
+		}
+	}
+
+	std::vector<std::pair<vector3d, bool>> multi_point(c_csplayer* player, int hitbox, matrix3x4_t* matrix)
+	{
+		std::vector<std::pair<vector3d, bool>> points = {};
+
+		auto model = player->get_model();
+		if (!model)
+			return points;
+
+		auto hdr = interfaces::model_info->get_studio_model(model);
+		if (!hdr)
+			return points;
+
+		auto set = hdr->get_hitbox_set(player->hitbox_set());
+		if (!set)
+			return points;
+
+		auto bbox = set->get_hitbox(hitbox);
+		if (!bbox)
+			return points;
+
+		// these indexes represent boxes.
+		if (bbox->radius <= 0.f) {
+			// references: 
+			//      https://developer.valvesoftware.com/wiki/Rotation_Tutorial
+			//      CBaseAnimating::GetHitboxBonePosition
+			//      CBaseAnimating::DrawServerHitboxes
+
+			// convert rotation angle to a matrix.
+			matrix3x4_t rot_matrix = {};
+			rot_matrix.angle_matrix(bbox->rotation);
+
+			// apply the rotation to the entity input space (local).
+			matrix3x4_t mat = {};
+			math::contact_transforms(matrix[bbox->bone], rot_matrix, mat);
+
+			// extract origin from matrix.
+			vector3d origin = mat.get_origin();
+
+			// compute raw center point.
+			vector3d center = (bbox->bbmin + bbox->bbmax) * 0.5f;
+
+			// add center point
+			points.emplace_back(center, true);
+
+			// nothing to do here we are done.
+			if (points.empty())
+				return points;
+
+			// rotate our bbox points by their correct angle
+			// and convert our points to world space.
+			for (auto& p : points)
+			{
+				// VectorRotate.
+				// rotate point by angle stored in matrix.
+				p.first = { p.first.scalar_product(mat.mat[0]), p.first.scalar_product(mat.mat[1]), p.first.scalar_product(mat.mat[2]) };
+
+				// transform point to world space.
+				p.first += origin;
+			}
+		}
+		// these hitboxes are capsules.
+		//else 
+		{
+
+			// compute raw center point.
+			vector3d max = bbox->bbmax;
+			vector3d min = bbox->bbmin;
+			vector3d center = (bbox->bbmin + bbox->bbmax) * 0.5f;
+
+			switch (hitbox)
+			{
+			case hitbox_head:
+			{
+				// add center.
+				float r = bbox->radius * HEAD_SCALE;
+				points.emplace_back(center, true);
+
+				// rotation matrix 45 degrees.
+				// https://math.stackexchange.com/questions/383321/rotating-x-y-points-45-degrees
+				// std::cos( deg_to_rad( 45.f ) )
+				constexpr float rotation = 0.70710678f;
+
+				// top/back 45 deg.
+				// this is the best spot to shoot at.
+				points.emplace_back(vector3d{ max.x + (rotation * r), max.y + (-rotation * r), max.z }, false);
+
+				// right.
+				points.emplace_back(vector3d{ max.x, max.y, max.z + r }, false);
+
+				// left.
+				points.emplace_back(vector3d{ max.x, max.y, max.z - r }, false);
+
+				// back.
+				points.emplace_back(vector3d{ max.x, max.y - r, max.z }, false);
+			}
+			break;
+			case hitbox_stomach:
+			{
+				float r = bbox->radius * BODY_SCALE;
+
+				// center.
+				points.emplace_back(center, true);
+				points.emplace_back(vector3d(center.x, center.y, min.z + r), false);
+				points.emplace_back(vector3d(center.x, center.y, max.z - r), false);
+				// back.
+				points.emplace_back(vector3d{ center.x, max.y - r, center.z }, true);
+			}
+			break;
+
+			case hitbox_lower_chest:
+			case hitbox_chest:
+			{
+				float r = bbox->radius;
+				points.emplace_back(center, true);
+
+				// left & right points
+				points.emplace_back(vector3d(center.x, center.y, bbox->bbmax.z + bbox->radius), false);
+				points.emplace_back(vector3d(center.x, center.y, bbox->bbmin.z - bbox->radius), false);
+
+				// add extra point on back.
+				points.emplace_back(vector3d{ center.x, bbox->bbmax.y - bbox->radius, center.z }, false);
+			}
+			break;
+			case hitbox_left_calf:
+			case hitbox_right_calf:
+				points.emplace_back(center, true);
+				break;
+			case hitbox_left_thigh:
+			case hitbox_right_thigh:
+			{
+				// add center.
+				points.emplace_back(center, true);
+
+				// bottom point (knees)
+				points.emplace_back(vector3d{ max.x + (bbox->radius / 3.f), max.y, max.z }, false);
+			}
+			break;
+			case hitbox_left_upper_arm:
+			case hitbox_right_upper_arm:
+			{
+				// elbow.
+				points.emplace_back(vector3d{ max.x + (bbox->radius / 2.f), center.y, center.z }, false);
+			}
+			break;
+			}
+
+			// nothing left to do here.
+			if (points.empty())
+				return points;
+
+			// transform capsule points.
+			for (auto& p : points)
+				math::vector_transform(p.first, matrix[bbox->bone], p.first);
+		}
+
+		return points;
+	}
+}
+
+namespace ragebot
+{
+	float HITCHANCE_AMT = 0.6f;
+	float DAMAGE_AMT = 20.f;
+
+	std::vector<c_csplayer*> players = {};
+
+	std::array<int, 13> hitbox_list =
+	{
+		hitbox_head,
+		hitbox_chest,
+		hitbox_lower_chest,
+		hitbox_stomach,
+		hitbox_pelvis,
+		hitbox_left_upper_arm,
+		hitbox_right_upper_arm,
+		hitbox_left_thigh,
+		hitbox_right_thigh,
+		hitbox_left_calf,
+		hitbox_right_calf,
+		hitbox_left_foot,
+		hitbox_right_foot,
+	};
+
+	void set_record(record_t* record)
+	{
+		auto player = record->player;
+		if (!player)
+			return;
+
+		auto collider = player->get_collider();
+		if (!collider)
+			return;
+
+		game_fn::set_abs_origin(player, record->origin);
+
+		collider->mins = record->obb_mins;
+		collider->maxs = record->obb_maxs;
+
+		std::memcpy(player->get_bone_cache().base(), record->bones, 
+			sizeof(matrix3x4_t) * player->get_bone_cache().count());
+	}
+
+	std::array<record_t, 65> backup_records = {};
+
+	best_target_t best = {};
+
+	// save records from old and new tick for every player
+	std::array<std::array<std::vector<tick_selection_t>, 2>, 65> tick_selection = {};
+
+	int get_total_damage(record_t* record, int type, int idx)
+	{
+		auto player = record->player;
+		if (!player)
+			return -1;
+
+		tick_selection[idx][type].clear();
+
+		set_record(record);
+
+		int total_dmg = 0;
+
+		for (auto h : hitbox_list)
+		{
+			auto pos = player->hitbox_position(h, record->bones);
+
+			auto info = autowall::run(pos, player, g::local(), g::local()->eye_pos(), aim_utils::hitbox_to_hitgroup(h));
+			if (info.did_penetrate_wall && info.penetration_count >= 4)
+				continue;
+
+			if (info.damage > 0)
+				total_dmg += info.damage;
+
+			tick_selection[idx][type].emplace_back(tick_selection_t(pos, info.damage, h));
+		}
+
+		set_record(&backup_records[idx]);
+		return total_dmg;
+	}
+
+	int get_scan_type(c_csplayer* player, record_t* last, record_t* old, int idx)
+	{
+		int dmg_last = get_total_damage(last, last_tick, idx);
+		int dmg_old = -1;
+
+		if (old)
+			dmg_old = get_total_damage(old, old_tick, idx);
+
+		if (dmg_old > dmg_last)
+			return old_tick;
+
+		return last_tick;
+	}
+
+	bool hitchance_zero = false;
+
+	void scan_points()
+	{
+		best.reset();
+
+		float best_damage = FLT_MIN;
+		vector3d best_point = {};
+		int best_hitbox = -1;
+
+		for (auto p : players)
+		{
+			int idx = p->index() - 1;
+
+			backup_records[idx].parse(p);
+
+			auto last = lag_compensation->get_latest_record(p);
+			if (!last)
+				continue;
+
+			auto old = lag_compensation->get_oldest_record(p);
+			int scan = get_scan_type(p, last, old, idx);
+
+			auto cur_scan = tick_selection[idx][scan];
+			auto rec = scan == last_tick ? last : old;
+
+			std::vector<aimbot_data_t> aimbot_data = {};
+			for (auto& s : cur_scan)
+			{
+				aimbot_data_t data = {};
+				data.hitbox = s.hitbox;
+				data.body = s.hitbox >= hitbox_pelvis && s.hitbox <= hitbox_chest;
+
+				auto points = aim_utils::multi_point(p, s.hitbox, rec->bones);
+				for (const auto& pt : points)
+				{
+					total_info_t info = {};
+					bool calc_damage = !pt.second || s.damage <= 0 && pt.first != s.point;
+
+					if (calc_damage) 
+					{
+						set_record(rec);
+						info = autowall::run(pt.first, p, g::local(), g::local()->eye_pos(), aim_utils::hitbox_to_hitgroup(s.hitbox));
+						set_record(&backup_records[idx]);
+					}
+
+					if (info.damage < DAMAGE_AMT)
+						continue;
+
+					data.points[0] = s.point; // center
+					data.points[1] = pt.first; // multipoint
+
+					data.damages[0] = s.damage; // center damage
+					data.damages[1] = info.damage; // multipoint damage
+
+					data.record = rec; // backtrack record
+
+					aimbot_data.emplace_back(data);
+				}
+			}
+
+			if (aimbot_data.empty())
+				return;
+
+			bool is_dt = config::rage::auto_fire;
+
+			for (const auto& d : aimbot_data)
+			{
+				auto is_dt_aim = [&]()
+				{
+					if (is_dt && d.body)
+					{
+						float hp = d.record->player->health() * 0.5f;
+
+						if (d.damages[0] >= hp)
+						{
+							log_console("dt | body center | lethal \n");
+							best.get(p, d.record->sim_time, d.points[0], d.hitbox, d.record->bones);
+							return true;
+						}
+						else
+						{
+							if (d.damages[1] > best_damage)
+							{
+								log_console("dt | body mpoint | lethal \n");
+								best.get(p, d.record->sim_time, d.points[1], d.hitbox, d.record->bones);
+								best_damage = d.damages[1];
+							}
+							return true;
+						}
+					}
+					return false;
+				};
+
+				if (!is_dt_aim())
+				{
+					for (int i = 0; i < 2; i++)
+					{
+						if (d.damages[i] > best_damage)
+						{
+							log_console("get best point | current hitbox: %d \n", d.hitbox);
+							best.get(p, d.record->sim_time, d.points[1], d.hitbox, d.record->bones);
+							/*if (d.hitbox == hitbox_head)
+							{
+								bool safe_point =
+									aim_utils::can_hit_hitbox(g::local()->eye_pos(), best_point, p, d.hitbox, d.record->bones)
+									&& aim_utils::can_hit_hitbox(g::local()->eye_pos(), best_point, p, d.hitbox, d.record->unresolved_bones);
+
+								if (safe_point)
+								{
+									log_console("get safe head point \n");
+									best.get(p, d.record->sim_time, d.points[1], d.hitbox, d.record->bones);
+									best_damage = d.damages[i];
+								}
+							}
+							else
+								*/
+
+							best_damage = d.damages[i];
+						}
+					}
+					/*bool safe_point =
+						aim_utils::can_hit_hitbox(g::local()->eye_pos(), best_point, p, d.hitbox, d.record->bones)
+						&& aim_utils::can_hit_hitbox(g::local()->eye_pos(), best_point, p, d.hitbox, d.record->unresolved_bones);
+
+					best.get(p, d.record->sim_time, best_point, d.hitbox, d.record->bones);*/
+				}
+			}
+		}
+	}
+
+	void aim_at_enemy()
+	{
+		if (!best.filled || !best.player || !best.point.valid())
+			return;
+
+		if (!misc_checks::is_able_to_shoot())
+			return;
+
+		if (!aim_utils::hit(best, HITCHANCE_AMT))
+			return;
+
+		g::cmd->buttons |= in_attack;
+
+		if (misc_checks::is_firing())
+		{
+			// aim at point + compensate recoil
+			g::cmd->viewangles = math::normalize(math::angle_from_vectors(g::local()->eye_pos(), best.point)) - aim_utils::get_recoil_angle();
+			
+			// bypass ingame lagcomp
+			g::cmd->tickcount = math::time_to_ticks(best.sim_time + lag_compensation->get_lerp_time());
+		}
+	}
+
+	void get_aimbot_targets()
+	{
+		players.clear();
+
+		auto player_array = listener_entity->get_entity(ent_player);
+		if (player_array.empty())
+			return;
+
+		for (auto player_info : player_array)
+		{
+			auto player = (c_csplayer*)player_info.entity;
+			if (!player)
+				continue;
+
+			if (player->dormant() || !player->is_alive())
+				continue;
+
+			if (player == g::local() || player->team() == g::local()->team())
+				continue;
+
+			players.emplace_back(player);
+		}
+
+		std::sort(players.begin(), players.end(), [&](c_csplayer* a, c_csplayer* b)
+			{
+				return g::local()->origin().distance_to_vector(a->origin())
+					> g::local()->origin().distance_to_vector(b->origin());
+			});
+	}
+
+	void run()
+	{
+		if (!config::rage::enable)
+			return;
+
+		hitchance_zero = false;
+
+		get_aimbot_targets();
+		scan_points();
+		aim_at_enemy();
+	}
+}

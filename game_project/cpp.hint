@@ -1,0 +1,16 @@
+
+#define ADD_VAR(name, type, ptr, netvar) type name() { \
+	return *(type*)((uintptr_t)ptr + (netvar)); \
+}
+
+#define ADD_VAR_REF(name, type, ptr, netvar) type& name() { \
+	return *(type*)((uintptr_t)ptr + (netvar)); \
+}
+
+#define ADD_VAR_PTR(name, type, ptr, netvar) type* name() { \
+	return (type*)((uintptr_t)ptr + (netvar)); \
+}
+
+#define ADD_VAR_PTR2(name, type, ptr, netvar) type* name() { \
+	return *(type**)((uintptr_t)ptr + (netvar)); \
+}

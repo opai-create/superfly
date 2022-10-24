@@ -1,0 +1,315 @@
+#include "memory.h"
+
+#include <vector>
+
+#include <string>
+
+#include <algorithm>
+
+#include <memory>
+#include <Psapi.h>
+
+namespace m
+{
+	PE::Module client = {};
+	PE::Module engine = {};
+	PE::Module materialsystem = {};
+	PE::Module tier0 = {};
+	PE::Module serverbrowser = {};
+
+	void init()
+	{
+		client				= PE::GetModule(HASH("client.dll"));
+		engine				= PE::GetModule(HASH("engine.dll"));
+		tier0				= PE::GetModule(HASH("tier0.dll"));
+		materialsystem		= PE::GetModule(HASH("materialsystem.dll"));
+	}
+}
+
+namespace memory
+{
+	namespace pattern
+	{
+		void parse()
+		{
+			log_console("Get patterns...\n");
+
+			patterns[hud_scope_paint] = mem_utils::find_pattern(m::client,
+					"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x78\x56\x89\x4C\x24\x14");
+
+			patterns[get_name] = mem_utils::find_pattern(m::client,
+				"\x56\x8B\x35\xCC\xCC\xCC\xCC\x85\xF6\x74\x21\x8B\x41");
+
+			patterns[init_key_values] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x51\x33\xC0\xC7\x45");
+
+			patterns[load_from_buffer] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x34\x53\x8B\x5D\x0C\x89");
+
+			patterns[list_leaves_in_box] = mem_utils::find_pattern(m::client,
+				"\xFF\x50\x18\x89\x44\x24\x14\xEB").add(3);
+
+			patterns[get_color_modulation] = mem_utils::find_pattern(m::materialsystem,
+				"\x55\x8B\xEC\x83\xEC\xCC\x56\x8B\xF1\x8A\x46");
+
+			patterns[draw_models] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF8\x51\x8B\x45\x18");
+
+			patterns[using_static_prop_debug] = mem_utils::find_pattern(m::engine,
+				"\x8B\x0D\xCC\xCC\xCC\xCC\x81\xF9\xCC\xCC\xCC\xCC\x75\xCC\xA1\xCC\xCC\xCC\xCC\x35\xCC\xCC\xCC\xCC\xEB\xCC\x8B\x01\xFF\x50\xCC\x83\xF8\xCC\x0F\x85\xCC\xCC\xCC\xCC\x8B\x0D");
+
+			patterns[load_named_sky] = mem_utils::find_pattern(m::engine,
+				"\x55\x8B\xEC\x81\xEC\xCC\xCC\xCC\xCC\x56\x57\x8B\xF9\xC7\x45");
+
+			patterns[disable_post_process] = mem_utils::find_pattern(m::client,
+				"\x80\x3D\xCC\xCC\xCC\xCC\xCC\x53\x56\x57\x0F\x85").add(2);
+
+			patterns[return_addr_drift_pitch] = mem_utils::find_pattern(m::client,
+				"\x84\xC0\x75\x0B\x8B\x0D\xCC\xCC\xCC\xCC\x8B\x01\xFF\x50\x4C");
+
+			patterns[return_addr_apply_shake] = mem_utils::find_pattern(m::client,
+				"\x84\xC0\x75\x24\xA1\xCC\xCC\xCC\xCC\xB9\xCC\xCC\xCC\xCC\xFF\x50\x1C\xA1\xCC\xCC\xCC\xCC\x51\xC7\x04\x24\xCC\xCC\x80\x3F\xB9\xCC\xCC\xCC\xCC\x53\x57\xFF\x50\x20");
+
+			patterns[remove_smoke] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xEC\x08\x8B\x15\xCC\xCC\xCC\xCC\x0F\x57\xC0").add(8);
+
+			patterns[remove_fog] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x8B\x0D\xCC\xCC\xCC\xCC\x83\xEC\x0C\x8B\x01\x53");
+
+			patterns[check_file_crc_with_server] = mem_utils::find_pattern(m::engine,
+				"\x55\x8B\xEC\x81\xEC\xCC\xCC\xCC\xCC\x53\x8B\xD9\x89\x5D\xF8\x80");
+
+			patterns[set_view_model_offsets] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x8B\x45\x08\xF3\x0F\x7E\x45");
+
+			patterns[prediction_random_seed] = mem_utils::find_pattern(m::client,
+				"\xA3\xCC\xCC\xCC\xCC\x66\x0F\x6E\x86").add(1);
+
+			patterns[prediction_player] = mem_utils::find_pattern(m::client,
+				"\x89\x35\xCC\xCC\xCC\xCC\xF3\x0F\x10\x48").add(2);
+
+			patterns[md5_pseudo_random] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x70\x6A");
+
+			patterns[physics_run_think] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xEC\x10\x53\x56\x57\x8B\xF9\x8B\x87");
+
+			patterns[think] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x56\x57\x8B\xF9\x8B\xB7\xCC\xCC\xCC\xCC\x8B");
+
+			patterns[move_helper] = mem_utils::find_pattern(m::client,
+				"\x8B\x0D\xCC\xCC\xCC\xCC\x8B\x45\xCC\x51\x8B\xD4\x89\x02\x8B\x01").add(2);
+
+			patterns[return_addr_compute_translucency] = mem_utils::find_pattern(m::client,
+				"\x84\xC0\x0F\x85\xCC\xCC\xCC\xCC\x83\x7B");
+
+			patterns[is_thirdperson_overview] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x80\x3D\xCC\xCC\xCC\xCC\xCC\x75\x06\x32\xC0\x5D\xC2\x04");
+
+			patterns[return_addr_draw_brushes] = mem_utils::find_pattern(m::client,
+				"\x85\xC0\x0F\x84\xCC\xCC\xCC\xCC\x8D\x04\x7F");
+
+			patterns[beam] = mem_utils::find_pattern(m::client,
+				"\xB9\xCC\xCC\xCC\xCC\xA1\xCC\xCC\xCC\xCC\xFF\x10\xA1\xCC\xCC\xCC\xCC\xB9").add(1);
+
+			patterns[add_view_model_bob] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\xA1\xCC\xCC\xCC\xCC\x83\xEC\x20\x8B\x40\x34");
+
+			patterns[calc_view_model_bob] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\xA1\xCC\xCC\xCC\xCC\x83\xEC\x10\x56\x8B\xF1\xB9");
+
+			patterns[input] = mem_utils::find_pattern(m::client,
+				"\xB9\xCC\xCC\xCC\xCC\xF3\x0F\x11\x04\x24\xFF\x50\x10").add(1);
+
+			patterns[player_resource] =mem_utils::find_pattern(m::client,
+				"\x8B\x3D\xCC\xCC\xCC\xCC\x85\xFF\x0F\x84\xCC\xCC\xCC\xCC\x81\xC7").add(2);
+
+			patterns[inventory_access] = mem_utils::find_pattern(m::client,
+				"\x84\xC0\x75\x05\xB0\x01\x5F").add(1);
+
+			patterns[return_addr_animstate_pitch] = mem_utils::find_pattern(m::client,
+				"\x8B\xCE\xF3\x0F\x10\xCC\x8B\x06\xF3\x0F\x11\x45\xCC\xFF\x90\xCC\xCC\xCC\xCC\xF3\x0F\x10\x55\xCC");
+
+			patterns[return_addr_animstate_yaw] = mem_utils::find_pattern(m::client,
+				"\xF3\x0F\x10\x55\xCC\x51\x8B\x8E\xCC\xCC\xCC\xCC");
+
+			patterns[get_eye_angles] = mem_utils::find_pattern(m::client,
+				"\x56\x8B\xF1\x85\xF6\x74\x32");
+
+			patterns[create_animstate] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x56\x8B\xF1\xB9\xCC\xCC\xCC\xCC\xC7\x46");
+
+			patterns[reset_animstate] = mem_utils::find_pattern(m::client,
+				"\x56\x6A\x01\x68\xCC\xCC\xCC\xCC\x8B\xF1");
+
+			patterns[update_animstate] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x18\x56\x57\x8B\xF9\xF3\x0F\x11\x54\x24");
+
+			patterns[update_all_viewmodel_addons] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x2C\x53\x8B\xD9\x56\x57\x8B");
+
+			patterns[get_viewmodel] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x8B\x45\x08\x53\x8B\xD9\x56\x8B\x84\x83\xCC\xCC\xCC\xCC\x83\xF8\xFF\x74\x1A\x0F\xB7\xF0");
+
+			patterns[client_state] = mem_utils::find_pattern(m::engine,
+				"\xA1\xCC\xCC\xCC\xCC\x8B\x80\xCC\xCC\xCC\xCC\xC3");
+
+			patterns[set_abs_angles] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x64\x53\x56\x57\x8B\xF1\xE8");
+
+			patterns[set_abs_origin] =mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF8\x51\x53\x56\x57\x8B\xF1\xE8");
+
+			patterns[should_skip_anim_frame] = mem_utils::find_pattern(m::client,
+				"\x57\x8B\xF9\x8B\x07\x8B\x80\xCC\xCC\xCC\xCC\xFF\xD0\x84\xC0\x75\x02");
+
+			patterns[modify_eye_position] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x70\x56\x57\x8B\xF9\x89\x7C\x24\x14\x83\x7F\x60");
+
+			patterns[setup_bones] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x56\x8B\xF1\x51\x8D");
+
+			patterns[bone_cache] = mem_utils::find_pattern(m::client,
+				"\xFF\xB7\xCC\xCC\xCC\xCC\x52").add(2);
+
+			patterns[update_clientside_animation] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x51\x56\x8B\xF1\x80\xBE\xCC\xCC\xCC\xCC\xCC\x74");
+
+			patterns[build_transformations] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF0\x81\xEC\xCC\xCC\xCC\xCC\x56\x57\x8B\xF9\x8B\x0D\xCC\xCC\xCC\xCC\x89\x7C\x24\x28\x8B");
+
+			patterns[standard_blending_rules] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF0\xB8\xCC\xCC\xCC\xCC\xE8\xCC\xCC\xCC\xCC\x56\x8B\x75\x08\x57\x8B\xF9\x85\xF6");
+
+			patterns[do_extra_bone_processing] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF8\x81\xEC\xCC\xCC\xCC\xCC\x53\x56\x8B\xF1\x57\x89\x74\x24\x1C");
+
+			patterns[retn_to_setup_velocity] = mem_utils::find_pattern(m::client,
+				"\x84\xC0\x75\x38\x8B\x0D\xCC\xCC\xCC\xCC\x8B\x01\x8B\x80");
+
+			patterns[retn_to_accumulate_layers] = mem_utils::find_pattern(m::client,
+				"\x84\xC0\x75\x0D\xF6\x87");
+
+			patterns[retn_to_reevaluate_anim_lod] = mem_utils::find_pattern(m::client,
+				"\x84\xC0\x0F\x85\xCC\xCC\xCC\xCC\xA1\xCC\xCC\xCC\xCC\x8B\xB7");
+
+			patterns[retn_to_extrapolation] = mem_utils::find_pattern(m::client,
+				"\xFF\xD0\xA1\xCC\xCC\xCC\xCC\xB9\xCC\xCC\xCC\xCC\xD9\x1D\xCC\xCC\xCC\xCC\xFF\x50\x34\x85\xC0\x74\x22\x8B\x0D\xCC\xCC\xCC\xCC").add(0x29);
+
+			patterns[retn_to_setup_bones] = mem_utils::find_pattern(m::client,
+				"\x84\xC0\x0F\x84\xCC\xCC\xCC\xCC\x8B\x44\x24\x24");
+
+			patterns[get_bone_merge] = mem_utils::find_pattern(m::client,
+				"\x89\x86\xCC\xCC\xCC\xCC\xE8\xCC\xCC\xCC\xCC\xFF\x75\x08").add(2);
+
+			patterns[get_pose_parameter] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x8B\x45\x08\x57\x8B\xF9\x8B\x4F\x04\x85\xC9\x75\x15\x8B");
+
+			patterns[update_merge_cache] = mem_utils::find_pattern(m::client,
+				"\xE8\xCC\xCC\xCC\xCC\x83\x7E\x10\xCC\x74\x64").rel32(1);
+
+			patterns[ik_context_ptr] = mem_utils::find_pattern(m::client,
+				"\x8B\x8F\xCC\xCC\xCC\xCC\x89\x4C\x24\x1C");
+
+			patterns[invalidate_bone_cache] = mem_utils::find_pattern(m::client,
+				"\x80\x3D\xCC\xCC\xCC\xCC\xCC\x74\x16\xA1\xCC\xCC\xCC\xCC\x48\xC7\x81");
+
+			patterns[custom_player_ptr] = mem_utils::find_pattern(m::client,
+				"\x80\xBF\x14\xCC\xCC\xCC\xCC\xCC\xCC\xCC\xCC\xCC\xCC\x83\xBF\x60\xCC\xCC\xCC\xCC\x74\x7A");
+
+			patterns[copy_to_follow] = mem_utils::find_pattern(m::client,
+				"\xE8\xCC\xCC\xCC\xCC\x8B\x87\xCC\xCC\xCC\xCC\x8D\x8C\x24\xCC\xCC\xCC\xCC\x8B\x7C\x24\x18").rel32(1);
+
+			patterns[copy_from_follow] = mem_utils::find_pattern(m::client,
+				"\xE8\xCC\xCC\xCC\xCC\xF3\x0F\x10\x45\xCC\x8D\x84\x24\xCC\xCC\xCC\xCC").rel32(1);
+
+			patterns[add_dependencies] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x81\xEC\xBC\xCC\xCC\xCC\x53\x56\x57");
+
+			patterns[attachments_helper] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xEC\x48\x53\x8B\x5D\x08\x89\x4D\xF4");
+
+			patterns[ik_ctx_construct] = mem_utils::find_pattern(m::client,
+				"\x53\x8B\xD9\xF6\xC3\x03\x74\x0B\xFF\x15\xCC\xCC\xCC\xCC\x84\xC0\x74\x01\xCC\xC7\x83\xCC\xCC\xCC\xCC\xCC\xCC\xCC\xCC\x8B\xCB");
+
+			patterns[ik_ctx_destruct] = mem_utils::find_pattern(m::client,
+				"\x56\x8B\xF1\x57\x8D\x8E\xCC\xCC\xCC\xCC\xE8\xCC\xCC\xCC\xCC\x8D\x8E\xCC\xCC\xCC\xCC\xE8\xCC\xCC\xCC\xCC\x83\xBE\xCC\xCC\xCC\xCC\xCC");
+
+			patterns[ik_ctx_init] =mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xEC\x08\x8B\x45\x08\x56\x57\x8B\xF9\x8D\x8F");
+
+			patterns[ik_ctx_update_targets] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF0\x81\xEC\xCC\xCC\xCC\xCC\x33\xD2");
+
+			patterns[ik_ctx_solve_dependencies] =mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF0\x81\xEC\xCC\xCC\xCC\xCC\x8B\x81");
+
+			patterns[bone_setup_init_pose] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xEC\x10\x53\x8B\xD9\x89\x55\xF8\x56\x57\x89\x5D\xF4\x8B\x0B\x89\x4D\xF0");
+
+			patterns[accumulate_pose] =mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF0\xB8\xCC\xCC\xCC\xCC\xE8\xCC\xCC\xCC\xCC\xA1");
+
+			patterns[bone_setup_calc_autoplay_sequences] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xEC\x10\x53\x56\x57\x8B\x7D\x10\x8B\xD9\xF3\x0F\x11\x5D\xCC");
+
+			patterns[bone_setup_calc_bone_adjust] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF8\x81\xEC\xCC\xCC\xCC\xCC\x8B\xC1\x89\x54\x24\x04\x89\x44\x24\x2C\x56\x57\x8B\xCC");
+
+			patterns[studio_hdr_ptr] = mem_utils::find_pattern(m::client,
+				"\x8B\xB7\xCC\xCC\xCC\xCC\x89\x74\x24\x20");
+
+			patterns[accumulate_pose_debug_break] = mem_utils::find_pattern(m::client,
+				"\xCC\xF3\x0F\x10\x4D\xCC\x0F\x57");
+
+			patterns[invalidate_physics_recursive] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x0C\x53\x8B\x5D\x08\x8B\xC3\x56\x83\xE0\x04");
+
+			patterns[bone_merge_invalidate] = mem_utils::find_pattern(m::client,
+				"\x56\x8B\xF1\x0F\x57\xC0\xC7\x86");
+
+			patterns[bone_merge_init] = mem_utils::find_pattern(m::client,
+				"\xE8\xCC\xCC\xCC\xCC\xFF\x75\x08\x8B\x8E\xCC\xCC\xCC\xCC").rel32(1);
+
+			patterns[is_breakable] = mem_utils::find_pattern(m::client, 
+				"\x55\x8B\xEC\x51\x56\x8B\xF1\x85\xF6\x74\x68");
+
+			patterns[trace_filter] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF0\x83\xEC\x7C\x56\x52");
+
+			patterns[trace_filter_skip_entities] = mem_utils::find_pattern(m::client,
+				"\xE8\xCC\xCC\xCC\xCC\xF3\x0F\x10\x94\x24\xCC\xCC\xCC\xCC\xF3\x0F\x5C").rel32(1);
+
+			patterns[clip_ray_to_hitboxes] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF8\xF3\x0F\x10\x42");
+
+			patterns[modify_body_yaw] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x70\x56\x57\x8B\xF9\x89\x7C\x24\x38");
+
+			patterns[lookup_bone] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x53\x56\x8B\xF1\x57\x83\xBE\xCC\xCC\xCC\xCC\xCC\x75");
+
+			patterns[physics_simulate] = mem_utils::find_pattern(m::client,
+				"\x56\x8B\xF1\x8B\x8E\xCC\xCC\xCC\xCC\x83\xF9\xFF\x74\x23");
+
+			patterns[write_user_cmd] = mem_utils::find_pattern(m::client,
+				"\x55\x8B\xEC\x83\xE4\xF8\x51\x53\x56\x8B\xD9");
+
+			log_console(" \n");
+		}
+	}
+
+	void* get_interface(const char* library, const char* name)
+	{
+#ifdef _DEBUG
+		log_console("Module: %s | Name: %s \n", library, name);
+#endif
+		typedef void* (*create_interface_fn)(const char* name, int ret);
+		create_interface_fn create_interface = (create_interface_fn)GetProcAddress(GetModuleHandleA(library), "CreateInterface");
+
+		if (!create_interface)
+			return nullptr;
+
+		return create_interface(name, 0);
+	}
+}
