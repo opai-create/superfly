@@ -13,5 +13,6 @@ Nightmode
 ```
 Special credits to:
 KIRBI512
+h3r4n0x aka unkuwu
 Infirms1337
 Kamaz
